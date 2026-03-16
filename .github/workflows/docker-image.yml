@@ -1,48 +1,46 @@
-name: Build and Push Docker Image 
-#可以使用action生成自己的镜像
+name: Build & Push Nezha-Argo to GHCR
 
 on:
   push:
     branches: [ main ]
     paths:
       - 'Dockerfile'
-      - 'init.sh'
-      
+      - 'entrypoint.sh'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          file: ./Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/nezser:latest
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.description=XHTTP Server
-            org.opencontainers.image.licenses=MIT
+            ghcr.io/woshizaiyu/ldsnzer:latest
+          # 可选：同时打 sha/short 标签方便追溯
+          # ghcr.io/woshizaiyu/ldsnzer:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
