@@ -513,7 +513,7 @@ EOF
 
   # 生成定时任务: 1.每天北京时间 3:30:00 更新备份和还原文件，2.每天北京时间 4:00:00 备份一次，并重启 cron 服务； 3.每分钟自动检测在线备份文件里的内容
   [ -z "$NO_AUTO_RENEW" ] && [ -s $WORK_DIR/renew.sh ] && ! grep -q "$WORK_DIR/renew.sh" /etc/crontab && echo "30 3 * * * root bash $WORK_DIR/renew.sh" >> /etc/crontab
-  [ -s $WORK_DIR/backup.sh ] && ! grep -q "$WORK_DIR/backup.sh" /etc/crontab && echo "*/1 * * * * root bash $WORK_DIR/backup.sh a" >> /etc/crontab
+  [ -s $WORK_DIR/backup.sh ] && ! grep -q "$WORK_DIR/backup.sh" /etc/crontab && echo "0 */2 * * * root bash $WORK_DIR/backup.sh a" >> /etc/crontab
   [ -s $WORK_DIR/update.sh ] && ! grep -q "$WORK_DIR/update.sh" /etc/crontab && echo "0 4 * * * root bash $WORK_DIR/update.sh a" >> /etc/crontab
   [ -z "$NO_RES" ] && [ -s $WORK_DIR/restore.sh ] && ! grep -q "$WORK_DIR/restore.sh" /etc/crontab && echo "* * * * * root bash $WORK_DIR/restore.sh a" >> /etc/crontab
   service cron restart
